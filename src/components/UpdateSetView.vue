@@ -166,7 +166,7 @@ const stats = computed(() => {
 .us { padding: 22px 26px 60px; overflow: auto; height: 100%; }
 header { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px; }
 .kind { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip.strong { background: var(--accent); color: #06101d; border-color: transparent; font-weight: 600; }
+.chip.strong { background: var(--accent); color: var(--on-accent); border-color: transparent; font-weight: 600; }
 h1 { font-size: 21px; margin: 8px 0 4px; }
 .desc { margin: 0 0 6px; max-width: 70ch; }
 .meta { margin: 0; font-size: 12.5px; }
@@ -207,7 +207,7 @@ h2 .n { background: var(--bg-3); border: 1px solid var(--line); border-radius: 9
 .empty { padding: 16px; border: 1px dashed var(--line); border-radius: 10px; }
 .missing {
   border: 1px solid var(--logic); border-radius: 12px;
-  background: rgba(214, 178, 106, .07); padding: 16px 18px; margin-bottom: 18px;
+  background: var(--warn-bg); padding: 16px 18px; margin-bottom: 18px;
 }
 .mh { font-size: 14px; text-transform: none; letter-spacing: 0; color: var(--text); margin: 0 0 8px; }
 .missing p { margin: 0 0 12px; font-size: 13px; max-width: 78ch; }

@@ -66,14 +66,14 @@ const inputPreview = computed(() => props.node.inputs.slice(0, 3))
 }
 .box:hover { transform: translateY(-1px); }
 .box.logic { border-top-color: var(--logic); }
-.box.subflow { border-top-color: var(--subflow); background: rgba(195, 155, 240, .07); }
+.box.subflow { border-top-color: var(--subflow); background: var(--subflow-bg); }
 .box.logic .kind { color: var(--logic); }
 .box.subflow .kind { color: var(--subflow); }
 .kind {
   font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
   color: var(--accent); margin-right: 6px;
 }
-.box.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(98, 182, 255, .25); }
+.box.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--ring); }
 .top { display: flex; gap: 8px; align-items: center; }
 .num { font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); }
 .name { font-weight: 600; font-size: 13.5px; }

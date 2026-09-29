@@ -220,7 +220,7 @@ function flattenCount(item) {
 header { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 16px; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .chip.changed { color: var(--logic); border-color: var(--logic); }
-.chip.added { color: #7ee0a2; border-color: #7ee0a2; }
+.chip.added { color: var(--ok); border-color: var(--ok); }
 .chip.removed { color: var(--danger); border-color: var(--danger); }
 .chip.tiny { font-size: 10px; }
 h1 { font-size: 20px; margin: 8px 0 10px; }
@@ -262,7 +262,7 @@ nav .on { border-color: var(--accent); color: var(--accent); }
 .crow { display: flex; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 .cst { min-width: 90px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .crow.changed .cst { color: var(--logic); }
-.crow.added .cst { color: #7ee0a2; }
+.crow.added .cst { color: var(--ok); }
 .crow.removed .cst { color: var(--danger); }
 .ctitle { font-weight: 500; }
 .cfields { font-family: ui-monospace, monospace; font-size: 11.5px; }

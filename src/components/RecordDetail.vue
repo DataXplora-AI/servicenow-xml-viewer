@@ -165,7 +165,7 @@ function ioType(r) {
 .detail { padding: 22px 26px 60px; overflow: auto; height: 100%; }
 header { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px; }
 .kind { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip.strong { background: var(--accent); color: #06101d; border-color: transparent; font-weight: 600; }
+.chip.strong { background: var(--accent); color: var(--on-accent); border-color: transparent; font-weight: 600; }
 .chip.req { color: var(--danger); border-color: var(--danger); }
 h1 { font-size: 21px; margin: 8px 0 4px; }
 .desc { margin: 0 0 10px; max-width: 70ch; }
@@ -177,12 +177,12 @@ h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: v
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .io { display: flex; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--line); }
 .ioname { font-family: ui-monospace, monospace; font-size: 13px; }
-.trigger { border: 1px solid var(--accent-2); border-radius: 10px; padding: 12px 14px; background: rgba(126, 224, 192, .07); }
+.trigger { border: 1px solid var(--accent-2); border-radius: 10px; padding: 12px 14px; background: var(--accent-2-soft); }
 .thead { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
 .tname { font-weight: 600; }
 .req {
   font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--warn, #f0b86c);
+  color: var(--logic);
 }
 .rows { display: flex; flex-direction: column; gap: 6px; }
 .row { display: grid; grid-template-columns: 180px 1fr; gap: 12px; align-items: start; }

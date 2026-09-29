@@ -11,7 +11,9 @@ npm run dev
 ```
 
 Luego abre http://localhost:5183, pega el XML (o arrastra el archivo) y pulsa **Procesar XML**.
-El botón **Cargar ejemplo** trae un update set sintético para probar.
+
+La interfaz sigue el tema del sistema; el botón de la esquina superior derecha alterna entre
+seguir al sistema, claro y oscuro.
 
 Todo el procesamiento ocurre en el navegador: no hay backend, ni base de datos, ni autenticación.
 
@@ -41,7 +43,7 @@ Todo el procesamiento ocurre en el navegador: no hay backend, ni base de datos, 
 src/lib/xml.js      extracción de registros desde el XML (incluye payloads escapados)
 src/lib/model.js    índice por sys_id, relaciones y construcción de flows/actions
 src/lib/tables.js   catálogo de tablas conocidas
-src/lib/sample.js   update set de ejemplo
+src/lib/sample.js   update set de ejemplo (solo para pruebas, no se carga desde la interfaz)
 src/components/     UI (detalle, steps recursivos, diagrama, campos, código)
 ```
 
@@ -60,8 +62,7 @@ src/components/     UI (detalle, steps recursivos, diagrama, campos, código)
 Dos caminos:
 
 - En la pantalla inicial, marca **Cargar dos XML y compararlos de inmediato** y pega ambos.
-- Con un XML ya cargado, pulsa **Comparar con otro XML** y pega o sube el segundo
-  (el botón *Usar ejemplo v2* carga una variante del ejemplo para ver cómo se comporta).
+- Con un XML ya cargado, pulsa **Comparar con otro XML** y pega o sube el segundo.
 
 La comparación empareja los registros por `sys_id` (o por tabla + nombre si no lo hay) y muestra:
 

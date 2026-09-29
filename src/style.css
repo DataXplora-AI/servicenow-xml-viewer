@@ -1,31 +1,121 @@
+@import './assets/fonts.css';
+
+/* ------------------------------------------------------------------ marca
+   Paleta DataXplora. Los nombres de la marca viven arriba y el resto de la
+   interfaz usa solo los tokens semánticos de abajo: para repintar la app se
+   cambian estos ocho valores y nada más. */
 :root {
-  --bg: #0f1420;
-  --bg-2: #151b2b;
-  --bg-3: #1c2436;
-  --line: #27324a;
-  --text: #e6ebf5;
-  --muted: #93a0bb;
-  --accent: #62b6ff;
-  --accent-2: #7ee0c0;
-  --logic: #f0b866;
-  --subflow: #c39bf0;
-  --danger: #ff8b8b;
+  --midnight: #1a2332;  /* Dark 1 · principal */
+  --terracota: #bb4634; /* Accent 1 · primario */
+  --slate: #3d5a78;     /* Dark 2 · secundario */
+  --cloud: #f5f7fa;     /* Light 2 · surface */
+  --white: #ffffff;     /* Light 1 · base */
+  --ice: #e8eef4;       /* Accent 2 · fill */
+  --storm: #5a7491;     /* Accent 3 · muted */
+  --smoke: #d6e0ea;     /* Border */
+
+  /* ------------------------------------------------------------ superficie */
+  --bg: var(--white);
+  --bg-2: var(--cloud);
+  --bg-3: var(--ice);
+  --line: var(--smoke);
+  --text: var(--midnight);
+  --muted: var(--storm);
+
+  --accent: var(--terracota);
+  --accent-2: var(--slate);
+  --on-accent: var(--white);
+  /* fondos suaves derivados de los acentos: el borde manda, el relleno solo insinúa */
+  --accent-soft: rgba(187, 70, 52, .08);
+  --accent-2-soft: rgba(61, 90, 120, .07);
+  --ring: rgba(187, 70, 52, .22);
+  --hover: rgba(26, 35, 50, .04);
+  --scrim: rgba(255, 255, 255, .8);
+
+  /* --------------------------------------------------------------- estados
+     El acento de marca es un rojo, así que "eliminado" usa un carmesí más
+     profundo para no confundirse con un botón primario. */
+  --ok: #1f7a4d;
+  --ok-bg: rgba(31, 122, 77, .11);
+  --danger: #9b1c1c;
+  --danger-bg: rgba(155, 28, 28, .10);
+  --logic: #9a6310;
+  --warn-bg: rgba(154, 99, 16, .10);
+  --subflow: #6d4aa8;
+  --subflow-bg: rgba(109, 74, 168, .09);
+
   --radius: 10px;
 
-  /* resaltado de sintaxis — pensados sobre el fondo #0b0f19 de los bloques de código */
-  --syn-comment: #5f6d8a;
+  /* --------------------------------------------------------------- código */
+  --code-bg: #fbfcfe;
+  --code-gutter: #9aabc0;
+
+  /* resaltado de sintaxis — pensados sobre el fondo claro de los bloques */
+  --syn-comment: #7a8ca3;
+  --syn-string: #1f7a4d;
+  --syn-number: #9a6310;
+  --syn-literal: #9a6310;
+  --syn-keyword: #6d4aa8;
+  --syn-global: #0f6e6e;
+  --syn-func: #2563a8;
+  --syn-prop: #3d5a78;
+  --syn-punct: #7a8ca3;
+  --syn-regex: #a8347a;
+  --syn-tag: #2563a8;
+  --syn-attr: #0f6e6e;
+  --syn-key: #2563a8;
+
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------- modo oscuro
+   Las mismas ocho tintas de marca, invertidas: Midnight pasa de ser el texto a
+   ser la superficie, e Ice Blue de relleno a texto. Los acentos se aclaran para
+   mantener el contraste sobre fondo oscuro.
+   El atributo lo escribe el script de index.html antes del primer pintado, y
+   siempre vale "light" u "dark": por eso la paleta se define una sola vez. */
+:root[data-theme="dark"] {
+  --bg: #131a25;
+  --bg-2: #1a2332;
+  --bg-3: #243042;
+  --line: #2e3d52;
+  --text: #e8eef4;
+  --muted: #90a5bd;
+
+  --accent: #e06a52;
+  --accent-2: #8aabce;
+  --on-accent: #16202e;
+  --accent-soft: rgba(224, 106, 82, .14);
+  --accent-2-soft: rgba(138, 171, 206, .12);
+  --ring: rgba(224, 106, 82, .3);
+  --hover: rgba(232, 238, 244, .05);
+  --scrim: rgba(19, 26, 37, .8);
+
+  --ok: #56c68c;
+  --ok-bg: rgba(86, 198, 140, .15);
+  --danger: #f28b8b;
+  --danger-bg: rgba(242, 139, 139, .15);
+  --logic: #e2ab5c;
+  --warn-bg: rgba(226, 171, 92, .13);
+  --subflow: #bb98ee;
+  --subflow-bg: rgba(187, 152, 238, .13);
+
+  --code-bg: #0f151f;
+  --code-gutter: #55677e;
+
+  --syn-comment: #6b7d99;
   --syn-string: #9ede9f;
-  --syn-number: #f0b866;
-  --syn-literal: #f0b866;
+  --syn-number: #e2ab5c;
+  --syn-literal: #e2ab5c;
   --syn-keyword: #c79bf0;
   --syn-global: #7ee0c0;
-  --syn-func: #62b6ff;
+  --syn-func: #6fb7f5;
   --syn-prop: #c3d0e8;
   --syn-punct: #8492ae;
   --syn-regex: #f2a0c0;
-  --syn-tag: #62b6ff;
+  --syn-tag: #6fb7f5;
   --syn-attr: #7ee0c0;
-  --syn-key: #62b6ff;
+  --syn-key: #6fb7f5;
 
   color-scheme: dark;
 }
@@ -46,7 +136,7 @@
 .t-key { color: var(--syn-key); }
 /* las expresiones {{...}} de ServiceNow se ven igual dentro y fuera del código */
 .t-pill {
-  color: var(--accent); background: rgba(98, 182, 255, .12);
+  color: var(--accent); background: var(--accent-soft);
   border-radius: 4px; padding: 0 2px;
 }
 
@@ -57,7 +147,15 @@ html, body, #app { height: 100%; margin: 0; }
 body {
   background: var(--bg);
   color: var(--text);
-  font: 14px/1.5 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 14px/1.6 "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Poppins es geométrica y ancha: los títulos usan una segunda sans más estrecha
+   para que un nombre largo de flow no se coma dos líneas de encabezado. */
+h1, h2, h3, h4, .font-title {
+  font-family: "Space Grotesk", "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -.01em;
 }
 
 button {
@@ -68,9 +166,17 @@ button {
   border-radius: 8px;
   padding: 6px 12px;
   cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
 }
-button:hover { border-color: var(--accent); }
-button.primary { background: var(--accent); color: #06101d; border-color: transparent; font-weight: 600; }
+button:hover { border-color: var(--accent); color: var(--accent); }
+button.primary {
+  background: var(--accent); color: var(--on-accent);
+  border-color: transparent; font-weight: 600;
+}
+/* el hover del primario oscurece en claro y aclara en oscuro */
+button.primary:hover { filter: brightness(.92); color: var(--on-accent); }
+:root[data-theme="dark"] button.primary:hover { filter: brightness(1.1); }
+button.primary:disabled { opacity: .45; cursor: default; }
 button.ghost { background: transparent; }
 
 code, pre { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -86,8 +192,8 @@ code, pre { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, 
   color: var(--muted);
 }
 .pill-data {
-  background: rgba(98, 182, 255, 0.15);
-  border: 1px solid rgba(98, 182, 255, 0.4);
+  background: var(--accent-soft);
+  border: 1px solid var(--ring);
   border-radius: 6px;
   padding: 0 4px;
   color: var(--accent);

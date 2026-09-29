@@ -40,8 +40,8 @@ const big = computed(() => {
 <style scoped>
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .cell { min-width: 0; padding: 4px 8px; border-radius: 6px; }
-.two.changed .left, .two.removed .left { background: rgba(255, 120, 120, .13); }
-.two.changed .right, .two.added .right { background: rgba(80, 200, 130, .14); }
+.two.changed .left, .two.removed .left { background: var(--danger-bg); }
+.two.changed .right, .two.added .right { background: var(--ok-bg); }
 .none { font-size: 12px; }
 @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
 </style>

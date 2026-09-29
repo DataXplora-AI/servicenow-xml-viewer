@@ -104,9 +104,9 @@ const changes = computed(
 .card.subflow { border-left-color: var(--subflow); }
 .card.equal, .card.moved { opacity: .55; }
 /* el estado del par manda sobre el tipo de nodo: es lo que se viene a mirar */
-.card.mod { background: rgba(240, 184, 102, .09); }
-.left .card.del { background: rgba(255, 120, 120, .13); border-left-color: var(--danger); }
-.right .card.add { background: rgba(80, 200, 130, .14); border-left-color: #5ac98a; }
+.card.mod { background: var(--warn-bg); }
+.left .card.del { background: var(--danger-bg); border-left-color: var(--danger); }
+.right .card.add { background: var(--ok-bg); border-left-color: var(--ok); }
 
 /* El hueco marca que el paso no existe de ese lado. Si no se ve, la columna parece
    vacía y la comparación deja de leerse como dos lados. */
@@ -123,7 +123,7 @@ const changes = computed(
   letter-spacing: .07em;
   color: var(--muted);
   background: repeating-linear-gradient(
-    -45deg, transparent, transparent 5px, rgba(147, 160, 187, .09) 5px, rgba(147, 160, 187, .09) 10px
+    -45deg, transparent, transparent 5px, rgba(90, 116, 145, .12) 5px, rgba(90, 116, 145, .12) 10px
   );
 }
 

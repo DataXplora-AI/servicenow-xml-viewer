@@ -3,7 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ServiceNow XML Viewer</title>
+    <!-- PLACEHOLDER: reemplazar por el favicon definitivo de DataXplora -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>ServiceNow XML Viewer · DataXplora</title>
+    <!--
+      El tema se resuelve antes de pintar: si esperara a que Vue monte, una recarga en
+      modo oscuro mostraría un destello blanco. Solo escribe data-theme (claro u oscuro,
+      nunca "auto"), así el CSS necesita una sola definición de la paleta oscura.
+    -->
+    <script>
+      (function () {
+        var pref = null
+        try { pref = localStorage.getItem('dxv-theme') } catch (e) {}
+        var dark = pref === 'dark' || (pref !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

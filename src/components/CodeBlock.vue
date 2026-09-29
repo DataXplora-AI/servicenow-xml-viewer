@@ -38,7 +38,7 @@ async function copy() {
 </template>
 
 <style scoped>
-.code { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #0b0f19; }
+.code { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--code-bg); }
 .bar {
   display: flex; justify-content: space-between; align-items: center;
   padding: 4px 8px; background: var(--bg-3); border-bottom: 1px solid var(--line); font-size: 12px;
@@ -55,12 +55,12 @@ pre { margin: 0; padding: 10px 0; overflow: auto; max-height: 460px; font-size: 
   display: grid; grid-template-columns: var(--gutter) 1fr; gap: 12px; min-height: 1.55em;
   content-visibility: auto; contain-intrinsic-size: auto 1.55em;
 }
-.ln:hover { background: rgba(255, 255, 255, .035); }
+.ln:hover { background: var(--hover); }
 /* no seleccionable: copiar el bloque a mano no debe arrastrar los números */
 .no {
   position: sticky; left: 0; z-index: 1;
-  text-align: right; color: #475066; user-select: none;
-  background: #0b0f19; padding-left: 12px; font-size: 11px;
+  text-align: right; color: var(--code-gutter); user-select: none;
+  background: var(--code-bg); padding-left: 12px; font-size: 11px;
 }
 .src { padding-right: 12px; }
 </style>

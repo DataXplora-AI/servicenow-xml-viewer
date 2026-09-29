@@ -98,9 +98,9 @@ const extra = computed(() => {
 .node .node { padding: 10px 11px; }
 .node.logic { border-left-color: var(--logic); background: var(--bg-3); }
 /* un subflujo es otro flujo entero corriendo dentro de este: conviene verlo de lejos */
-.node.subflow { border-left-color: var(--subflow); background: rgba(195, 155, 240, .06); }
-.chip.subflow { color: var(--subflow); background: rgba(195, 155, 240, .14); }
-.chip.logic { color: var(--logic); background: rgba(240, 184, 102, .14); }
+.node.subflow { border-left-color: var(--subflow); background: var(--subflow-bg); }
+.chip.subflow { color: var(--subflow); background: var(--subflow-bg); }
+.chip.logic { color: var(--logic); background: var(--warn-bg); }
 .head { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
 .caret { color: var(--muted); font-size: 11px; line-height: 24px; }
 .node.closed { padding-bottom: 10px; }

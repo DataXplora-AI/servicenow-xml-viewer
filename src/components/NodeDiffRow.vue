@@ -72,7 +72,7 @@ const label = { equal: 'sin cambios', moved: 'renumerado', mod: 'modificado', ad
 <style scoped>
 .ndr { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; background: var(--bg-2); overflow: hidden; }
 .ndr.mod { border-left: 3px solid var(--logic); }
-.ndr.add { border-left: 3px solid #5ac98a; }
+.ndr.add { border-left: 3px solid var(--ok); }
 .ndr.del { border-left: 3px solid var(--danger); }
 .ndr.equal, .ndr.moved { opacity: .72; }
 .head { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; }
@@ -82,7 +82,7 @@ const label = { equal: 'sin cambios', moved: 'renumerado', mod: 'modificado', ad
   min-width: 82px;
 }
 .ndr.mod .st { color: var(--logic); }
-.ndr.add .st { color: #7ee0a2; }
+.ndr.add .st { color: var(--ok); }
 .ndr.del .st { color: var(--danger); }
 .cols { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-width: 0; }
 .col { display: flex; gap: 6px; align-items: baseline; min-width: 0; }

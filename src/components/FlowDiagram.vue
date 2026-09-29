@@ -74,7 +74,7 @@ const found = computed(() => {
 }
 .trigger {
   border: 1px solid var(--accent-2); border-radius: 10px; padding: 10px 12px;
-  background: rgba(126, 224, 192, .08);
+  background: var(--accent-2-soft);
 }
 .badge {
   font-size: 10px; letter-spacing: .1em; color: var(--accent-2); font-weight: 700;

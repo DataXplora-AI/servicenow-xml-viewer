@@ -53,13 +53,13 @@ const stats = computed(() => ({
 </template>
 
 <style scoped>
-.dl { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #0b0f19; }
+.dl { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--code-bg); }
 .bar {
   display: flex; justify-content: space-between; align-items: center; gap: 8px;
   padding: 4px 8px; background: var(--bg-3); border-bottom: 1px solid var(--line); font-size: 12px;
 }
 .right { display: flex; gap: 8px; align-items: center; }
-.plus { color: #7ee0a2; font-family: ui-monospace, monospace; }
+.plus { color: var(--ok); font-family: ui-monospace, monospace; }
 .minus { color: var(--danger); font-family: ui-monospace, monospace; }
 .tiny { padding: 2px 8px; font-size: 12px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; max-height: 460px; overflow: auto; }
@@ -75,9 +75,9 @@ const stats = computed(() => ({
   content-visibility: auto; contain-intrinsic-size: auto 1.55em;
 }
 .ln code { white-space: pre-wrap; word-break: break-word; padding-right: 6px; }
-.no { text-align: right; color: #475066; user-select: none; font-family: ui-monospace, monospace; font-size: 11px; padding-top: 1px; }
-.add { background: rgba(80, 200, 130, .14); }
-.del { background: rgba(255, 120, 120, .13); }
-.blank { background: rgba(255, 255, 255, .025); }
+.no { text-align: right; color: var(--code-gutter); user-select: none; font-family: ui-monospace, monospace; font-size: 11px; padding-top: 1px; }
+.add { background: var(--ok-bg); }
+.del { background: var(--danger-bg); }
+.blank { background: rgba(26, 35, 50, .03); }
 @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 </style>

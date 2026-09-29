@@ -3,10 +3,11 @@ import { ref, computed, shallowRef } from 'vue'
 import RecordDetail from './components/RecordDetail.vue'
 import RecordDiff from './components/RecordDiff.vue'
 import UpdateSetView from './components/UpdateSetView.vue'
+import BrandLogo from './components/BrandLogo.vue'
 import { buildModel, genericView } from './lib/model.js'
 import { ignoredFields, toggleIgnored, clearIgnored } from './lib/ignored.js'
 import { buildComparison } from './lib/diff.js'
-import { SAMPLE_XML, SAMPLE_XML_V2 } from './lib/sample.js'
+import { themePref, resolvedTheme, cycleTheme, themeLabel } from './lib/theme.js'
 
 /* ---------------------------------------------------------------- estado */
 const xmlA = ref('')
@@ -20,6 +21,9 @@ const error = ref('')
 const dual = ref(false)          // pantalla inicial con dos paneles
 const compareModal = ref(false)  // modal para cargar el segundo XML
 const dragging = ref('')
+// Leer y parsear un update set real toma un momento: sin señal, soltar el archivo
+// parece no haber hecho nada. Guarda qué lado está ocupado ('a', 'b' o '').
+const loading = ref('')
 
 const selectedId = ref('')
 const adHoc = shallowRef(null)
@@ -148,8 +152,9 @@ async function parse(text, which) {
 
 async function analyze() {
   error.value = ''
+  if (!xmlA.value.trim()) { error.value = 'Falta el XML principal.'; return }
+  loading.value = 'a'
   try {
-    if (!xmlA.value.trim()) { error.value = 'Falta el XML principal.'; return }
     await parse(xmlA.value, 'a')
     if (dual.value && xmlB.value.trim()) await parse(xmlB.value, 'b')
     selectedKey.value = ''
@@ -157,18 +162,23 @@ async function analyze() {
     modelA.value = null
     modelB.value = null
     error.value = e.message
+  } finally {
+    loading.value = ''
   }
 }
 
 async function compareNow() {
   error.value = ''
+  if (!xmlB.value.trim()) { error.value = 'Pega o sube el XML con el que quieres comparar.'; return }
+  loading.value = 'b'
   try {
-    if (!xmlB.value.trim()) { error.value = 'Pega o sube el XML con el que quieres comparar.'; return }
     await parse(xmlB.value, 'b')
     selectedKey.value = ''
     compareModal.value = false
   } catch (e) {
     error.value = e.message
+  } finally {
+    loading.value = ''
   }
 }
 
@@ -200,44 +210,50 @@ function openRecord(record) {
 
 function select(item) { adHoc.value = null; showSet.value = false; selectedId.value = item.id }
 
-function readFile(file, which) {
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = async () => {
-    const text = String(reader.result)
-    if (which === 'a') { xmlA.value = text; nameA.value = file.name }
-    else { xmlB.value = text; nameB.value = file.name }
-    error.value = ''
-    try {
-      if (which === 'a') { await parse(text, 'a'); selectedKey.value = '' }
-      else if (modelA.value) { await parse(text, 'b'); selectedKey.value = ''; compareModal.value = false }
-    } catch (e) { error.value = e.message }
-  }
-  reader.readAsText(file)
+function read(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo.'))
+    reader.readAsText(file)
+  })
 }
 
-function onDrop(e, which) {
+async function readFile(file, which) {
+  if (!file) return
+  error.value = ''
+  loading.value = which
+  try {
+    const text = await read(file)
+    if (which === 'a') { xmlA.value = text; nameA.value = file.name }
+    else { xmlB.value = text; nameB.value = file.name }
+    if (which === 'a') { await parse(text, 'a'); selectedKey.value = '' }
+    else if (modelA.value) { await parse(text, 'b'); selectedKey.value = ''; compareModal.value = false }
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loading.value = ''
+  }
+}
+
+// Soltar un archivo solo lo carga en el cuadro de texto: el usuario todavía puede
+// editarlo o soltar el segundo antes de procesar. El spinner cubre la lectura, que
+// con un update set grande no es instantánea.
+async function onDrop(e, which) {
   dragging.value = ''
   const file = e.dataTransfer.files && e.dataTransfer.files[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    if (which === 'a') { xmlA.value = String(reader.result); nameA.value = file.name }
-    else { xmlB.value = String(reader.result); nameB.value = file.name; dual.value = true }
+  error.value = ''
+  loading.value = which
+  try {
+    const text = await read(file)
+    if (which === 'a') { xmlA.value = text; nameA.value = file.name }
+    else { xmlB.value = text; nameB.value = file.name; dual.value = true }
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = ''
   }
-  reader.readAsText(file)
-}
-
-function loadSample() {
-  xmlA.value = SAMPLE_XML
-  nameA.value = 'ejemplo.xml'
-  analyze()
-}
-
-function loadSampleB() {
-  xmlB.value = SAMPLE_XML_V2
-  nameB.value = 'ejemplo-v2.xml'
-  compareNow()
 }
 
 function reset() {
@@ -246,6 +262,7 @@ function reset() {
   nameA.value = 'XML A'; nameB.value = 'XML B'
   adHoc.value = null; selectedId.value = ''; selectedKey.value = ''
   error.value = ''; dual.value = false; showSet.value = false
+  loading.value = ''
   forcedPairs.value = {}
 }
 
@@ -258,7 +275,8 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
   <div class="app">
     <header class="top">
       <button class="brand" type="button" title="Volver al inicio" @click="reset">
-        <span class="logo">SN</span>
+        <!-- PLACEHOLDER: marca provisional, ver src/components/BrandLogo.vue -->
+        <BrandLogo :size="30" />
         <span class="t">ServiceNow XML Viewer</span>
       </button>
       <div class="acts">
@@ -280,10 +298,13 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
             Subir XML
             <input type="file" accept=".xml,text/xml" @change="readFile($event.target.files[0], 'a')" />
           </label>
-          <button class="ghost" @click="loadSample">Cargar ejemplo</button>
           <button v-if="modelA" class="primary" @click="compareModal = true">Comparar con otro XML</button>
         </template>
         <button v-if="modelA" class="ghost" @click="reset">Limpiar</button>
+        <button class="ghost theme" :title="themeLabel[themePref]" @click="cycleTheme">
+          <span aria-hidden="true">{{ themePref === 'auto' ? '◐' : resolvedTheme === 'dark' ? '☾' : '☀' }}</span>
+          <span class="sr">{{ themeLabel[themePref] }}</span>
+        </button>
       </div>
     </header>
 
@@ -311,11 +332,17 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
               <input type="file" accept=".xml,text/xml" @change="readFile($event.target.files[0], 'a')" />
             </label>
           </div>
-          <textarea
-            v-model="xmlA"
-            spellcheck="false"
-            placeholder="Pega aquí el XML: un update set completo (&lt;unload&gt; con varios &lt;sys_update_xml&gt;) o el XML de un solo registro (&lt;record_update&gt;)…"
-          ></textarea>
+          <div class="field">
+            <textarea
+              v-model="xmlA"
+              spellcheck="false"
+              placeholder="Pega aquí el XML: un update set completo (&lt;unload&gt; con varios &lt;sys_update_xml&gt;) o el XML de un solo registro (&lt;record_update&gt;)…"
+            ></textarea>
+            <div v-if="loading === 'a'" class="busy">
+              <span class="spinner"></span>
+              <span>Leyendo el archivo…</span>
+            </div>
+          </div>
         </div>
 
         <div
@@ -333,13 +360,19 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
               <input type="file" accept=".xml,text/xml" @change="readFile($event.target.files[0], 'b')" />
             </label>
           </div>
-          <textarea v-model="xmlB" spellcheck="false" placeholder="Pega aquí el segundo XML…"></textarea>
+          <div class="field">
+            <textarea v-model="xmlB" spellcheck="false" placeholder="Pega aquí el segundo XML…"></textarea>
+            <div v-if="loading === 'b'" class="busy">
+              <span class="spinner"></span>
+              <span>Leyendo el archivo…</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="introacts">
-        <button class="primary" :disabled="!xmlA.trim()" @click="analyze">
-          {{ dual ? 'Comparar XML' : 'Procesar XML' }}
+        <button class="primary" :disabled="!xmlA.trim() || !!loading" @click="analyze">
+          {{ loading ? 'Procesando…' : dual ? 'Comparar XML' : 'Procesar XML' }}
         </button>
         <span class="muted dhint">o arrastra archivos .xml sobre las zonas de texto</span>
         <span v-if="error" class="err">{{ error }}</span>
@@ -355,7 +388,7 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
     </main>
 
     <!-- ------------------------------------------------------ resultados -->
-    <main v-else class="work">
+    <main v-if="modelA" class="work">
       <aside>
         <input v-model="filter" class="search" placeholder="Filtrar registros…" />
 
@@ -527,21 +560,37 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
           @dragleave="dragging = ''"
           @drop.prevent="onDrop($event, 'b')"
         >
-          <textarea v-model="xmlB" spellcheck="false" placeholder="Pega aquí el segundo XML…"></textarea>
+          <div class="field">
+            <textarea v-model="xmlB" spellcheck="false" placeholder="Pega aquí el segundo XML…"></textarea>
+            <div v-if="loading === 'b'" class="busy">
+              <span class="spinner"></span>
+              <span>Leyendo el archivo…</span>
+            </div>
+          </div>
         </div>
         <div class="macts">
           <label class="filebtn">
             Subir archivo
             <input type="file" accept=".xml,text/xml" @change="readFile($event.target.files[0], 'b')" />
           </label>
-          <button class="ghost" @click="loadSampleB">Usar ejemplo v2</button>
           <span v-if="error" class="err">{{ error }}</span>
           <span class="spacer"></span>
           <button class="ghost" @click="compareModal = false">Cancelar</button>
-          <button class="primary" :disabled="!xmlB.trim()" @click="compareNow">Comparar</button>
+          <button class="primary" :disabled="!xmlB.trim() || !!loading" @click="compareNow">
+            {{ loading ? 'Procesando…' : 'Comparar' }}
+          </button>
         </div>
       </div>
     </div>
+
+    <footer class="foot">
+      <span class="by">
+        Powered by
+        <!-- PLACEHOLDER: marca provisional, ver src/components/BrandLogo.vue -->
+        <BrandLogo wordmark :size="18" />
+      </span>
+      <span class="local">Todo se procesa en tu navegador</span>
+    </footer>
   </div>
 </template>
 
@@ -551,6 +600,16 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--bg-2);
 }
+/* pie de marca: siempre visible, no compite con el contenido */
+.foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 18px 20px; border-top: 1px solid var(--line);
+  background: var(--bg-2); font-size: 11.5px; color: var(--muted);
+}
+.by { display: inline-flex; align-items: center; gap: 7px; }
+.by :deep(.brandmark) { color: var(--text); }
+.local { font-size: 11px; }
+@media (max-width: 560px) { .local { display: none; } }
 /* el nombre hace de botón de inicio: limpia y vuelve a la pantalla de carga */
 .brand {
   display: flex; gap: 10px; align-items: center;
@@ -558,11 +617,10 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
   background: none; border: 1px solid transparent; border-radius: 10px;
 }
 .brand:hover { border-color: var(--line); background: var(--bg-3); }
-.logo {
-  width: 32px; height: 32px; border-radius: 8px; background: var(--accent); color: #06101d;
-  display: grid; place-items: center; font-weight: 800; font-size: 13px;
+.t {
+  font-family: "Space Grotesk", "Poppins", sans-serif;
+  font-weight: 600; font-size: 15px; letter-spacing: -.01em;
 }
-.t { font-weight: 600; font-size: 14px; }
 .acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .filebtn {
   background: var(--bg-3); border: 1px solid var(--line); border-radius: 8px;
@@ -572,29 +630,60 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
 .filebtn:hover { border-color: var(--accent); }
 .filebtn input { display: none; }
 
-.intro { padding: 24px 20px; max-width: 1100px; width: 100%; margin: 0 auto; overflow: auto; }
+/* sin flex:1 la portada mide lo que mide su contenido y el pie sube hasta la
+   mitad de la pantalla, con el resto en blanco */
+.intro {
+  flex: 1; min-height: 0;
+  padding: 24px 20px; max-width: 1100px; width: 100%; margin: 0 auto; overflow: auto;
+}
 .introhead { margin-bottom: 12px; }
 .toggle { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
 .toggle.small { font-size: 12px; margin: 10px 2px 6px; }
 .panes { display: grid; grid-template-columns: 1fr; gap: 14px; }
 .panes.two { grid-template-columns: 1fr 1fr; }
 .drop { border: 1px dashed var(--line); border-radius: 12px; padding: 10px; background: var(--bg-2); }
-.drop.over { border-color: var(--accent); background: rgba(98, 182, 255, .08); }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
 .plabel { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); padding: 0 4px 8px; }
 textarea {
-  width: 100%; min-height: 300px; resize: vertical; background: #0b0f19; color: var(--text);
+  width: 100%; min-height: 300px; resize: vertical; background: var(--code-bg); color: var(--text);
   border: 1px solid var(--line); border-radius: 8px; padding: 12px;
   font-family: ui-monospace, monospace; font-size: 12.5px; line-height: 1.5;
 }
 .introacts { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
 .dhint { font-size: 12px; }
+
+/* el velo cubre solo el cuadro de texto: el resto de la pantalla sigue usable */
+.field { position: relative; }
+.busy {
+  position: absolute; inset: 0; border-radius: 8px;
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: center; justify-content: center;
+  background: var(--scrim); font-size: 12.5px; color: var(--muted);
+}
+.spinner {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--line); border-top-color: var(--accent);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+/* quien pide menos movimiento ve un pulso en vez de un giro */
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+}
+
+.theme { padding: 6px 10px; line-height: 1; font-size: 15px; }
+.sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
 .err { color: var(--danger); }
 .tips { margin-top: 20px; font-size: 13px; line-height: 1.8; }
 
 .work { flex: 1; display: grid; grid-template-columns: 310px 1fr; min-height: 0; }
 aside { border-right: 1px solid var(--line); background: var(--bg-2); overflow: auto; padding: 12px; }
 .search {
-  width: 100%; background: #0b0f19; color: var(--text); border: 1px solid var(--line);
+  width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line);
   border-radius: 8px; padding: 7px 10px; font: inherit;
 }
 .setbtn { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -624,7 +713,7 @@ aside { border-right: 1px solid var(--line); background: var(--bg-2); overflow: 
 .tag .x { opacity: .7; }
 .legend { display: flex; gap: 10px; font-size: 11px; margin: 0 2px 8px; flex-wrap: wrap; }
 .legend .changed { color: var(--logic); }
-.legend .added { color: #7ee0a2; }
+.legend .added { color: var(--ok); }
 .legend .removed { color: var(--danger); }
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 .list li {
@@ -632,10 +721,10 @@ aside { border-right: 1px solid var(--line); background: var(--bg-2); overflow: 
   border-radius: 8px; cursor: pointer; border: 1px solid transparent;
 }
 .list li:hover { background: var(--bg-3); }
-.list li.on { background: var(--bg-3); border-color: var(--accent); }
+.list li.on { background: var(--accent-soft); border-color: var(--accent); }
 .ic { width: 18px; text-align: center; font-family: ui-monospace, monospace; }
 .ic.changed { color: var(--logic); }
-.ic.added { color: #7ee0a2; }
+.ic.added { color: var(--ok); }
 .ic.removed { color: var(--danger); }
 .ic.equal { color: var(--muted); }
 .txt { display: flex; flex-direction: column; min-width: 0; }
@@ -649,11 +738,12 @@ aside { border-right: 1px solid var(--line); background: var(--bg-2); overflow: 
 .nothing { padding: 30px; }
 
 .overlay {
-  position: fixed; inset: 0; background: rgba(4, 8, 16, .72);
+  position: fixed; inset: 0; background: rgba(26, 35, 50, .45);
   display: grid; place-items: center; padding: 20px; z-index: 20;
 }
 .modal {
-  background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(26, 35, 50, .18);
   padding: 20px; width: min(820px, 100%);
 }
 .modal h2 { margin: 0 0 4px; font-size: 17px; }
