@@ -23,7 +23,7 @@ export async function buildModel(text) {
 
   // los inputs de los nodos de un flow viajan en gzip+base64: hay que expandirlos antes
   // de construir nada, porque el resto del modelo asume texto plano.
-  await inflateRecords(records)
+  const { skipped } = await inflateRecords(records)
 
   const bySysId = new Map()
   for (const r of records) if (r.sysId && !bySysId.has(r.sysId)) bySysId.set(r.sysId, r)
@@ -39,7 +39,7 @@ export async function buildModel(text) {
     }
   }
 
-  const model = { records, bySysId, refs }
+  const model = { records, bySysId, refs, inflateSkipped: skipped }
 
   const roots = pickRoots(records).map((r) => decorate(r, model))
 

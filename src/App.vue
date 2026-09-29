@@ -8,6 +8,7 @@ import { buildModel, genericView } from './lib/model.js'
 import { ignoredFields, toggleIgnored, clearIgnored } from './lib/ignored.js'
 import { buildComparison } from './lib/diff.js'
 import { themePref, resolvedTheme, cycleTheme, themeLabel } from './lib/theme.js'
+import { readXmlFile, assertXmlText } from './lib/validate.js'
 
 /* ---------------------------------------------------------------- estado */
 const xmlA = ref('')
@@ -33,6 +34,18 @@ const onlyChanges = ref(true)
 const showOthers = ref(false)
 
 const comparing = computed(() => !!(modelA.value && modelB.value))
+
+// Campos que no se descomprimieron por pasarse del tope. Se avisa: el campo se queda en
+// base64 y sin explicación parece un fallo del visor y no un archivo fuera de lo normal.
+const inflateWarning = computed(() => {
+  const list = [
+    ...((modelA.value && modelA.value.inflateSkipped) || []),
+    ...((modelB.value && modelB.value.inflateSkipped) || [])
+  ]
+  if (!list.length) return ''
+  const names = [...new Set(list.map((s) => s.field))].slice(0, 3).join(', ')
+  return `${list.length} campo(s) comprimido(s) se dejaron sin expandir porque ${list[0].reason} (${names}).`
+})
 
 /* --------------------------------------------------------- update set */
 // Un update set no es un registro más: es la lista de lo que se tocó. Cuando el XML lo
@@ -155,6 +168,8 @@ async function analyze() {
   if (!xmlA.value.trim()) { error.value = 'Falta el XML principal.'; return }
   loading.value = 'a'
   try {
+    assertXmlText(xmlA.value, nameA.value)
+    if (dual.value && xmlB.value.trim()) assertXmlText(xmlB.value, nameB.value)
     await parse(xmlA.value, 'a')
     if (dual.value && xmlB.value.trim()) await parse(xmlB.value, 'b')
     selectedKey.value = ''
@@ -172,6 +187,7 @@ async function compareNow() {
   if (!xmlB.value.trim()) { error.value = 'Pega o sube el XML con el que quieres comparar.'; return }
   loading.value = 'b'
   try {
+    assertXmlText(xmlB.value, nameB.value)
     await parse(xmlB.value, 'b')
     selectedKey.value = ''
     compareModal.value = false
@@ -210,21 +226,12 @@ function openRecord(record) {
 
 function select(item) { adHoc.value = null; showSet.value = false; selectedId.value = item.id }
 
-function read(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(new Error('No se pudo leer el archivo.'))
-    reader.readAsText(file)
-  })
-}
-
 async function readFile(file, which) {
   if (!file) return
   error.value = ''
   loading.value = which
   try {
-    const text = await read(file)
+    const text = await readXmlFile(file)
     if (which === 'a') { xmlA.value = text; nameA.value = file.name }
     else { xmlB.value = text; nameB.value = file.name }
     if (which === 'a') { await parse(text, 'a'); selectedKey.value = '' }
@@ -246,7 +253,7 @@ async function onDrop(e, which) {
   error.value = ''
   loading.value = which
   try {
-    const text = await read(file)
+    const text = await readXmlFile(file)
     if (which === 'a') { xmlA.value = text; nameA.value = file.name }
     else { xmlB.value = text; nameB.value = file.name; dual.value = true }
   } catch (err) {
@@ -388,6 +395,7 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
     </main>
 
     <!-- ------------------------------------------------------ resultados -->
+    <p v-if="inflateWarning" class="warnbar">⚠ {{ inflateWarning }}</p>
     <main v-if="modelA" class="work">
       <aside>
         <input v-model="filter" class="search" placeholder="Filtrar registros…" />
@@ -670,6 +678,13 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation: pulse 1.2s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .35; } }
+}
+
+/* franja de aviso: no es un error que impida trabajar, pero tampoco se esconde */
+.warnbar {
+  margin: 0; padding: 9px 20px; font-size: 12.5px;
+  color: var(--logic); background: var(--warn-bg);
+  border-bottom: 1px solid var(--line);
 }
 
 .theme { padding: 6px 10px; line-height: 1; font-size: 15px; }
