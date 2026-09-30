@@ -282,7 +282,6 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
   <div class="app">
     <header class="top">
       <button class="brand" type="button" title="Volver al inicio" @click="reset">
-        <!-- PLACEHOLDER: marca provisional, ver src/components/BrandLogo.vue -->
         <BrandLogo :size="30" />
         <span class="t">ServiceNow XML Viewer</span>
       </button>
@@ -592,11 +591,22 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
     </div>
 
     <footer class="foot">
-      <span class="by">
-        Powered by
-        <!-- PLACEHOLDER: marca provisional, ver src/components/BrandLogo.vue -->
-        <BrandLogo wordmark :size="18" />
-      </span>
+      <div class="brandfoot">
+        <span class="by">
+          Powered by
+          <!-- en pestaña nueva: el XML cargado vive sólo en memoria y salir de la página lo pierde -->
+          <a
+            class="site"
+            href="https://dataxplora.ai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Ir a dataxplora.ai"
+          >
+            <BrandLogo wordmark :size="18" />
+          </a>
+        </span>
+        <p class="tagline">Tu aliado de confianza en materia de cumplimiento y gobernanza de datos.</p>
+      </div>
       <span class="local">Todo se procesa en tu navegador</span>
     </footer>
   </div>
@@ -614,8 +624,12 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
   padding: 18px 20px; border-top: 1px solid var(--line);
   background: var(--bg-2); font-size: 11.5px; color: var(--muted);
 }
+.brandfoot { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .by { display: inline-flex; align-items: center; gap: 7px; }
-.by :deep(.brandmark) { color: var(--text); }
+.site { display: inline-flex; border-radius: 4px; transition: opacity .15s; }
+.site:hover { opacity: .72; }
+.site:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.tagline { margin: 0; font-size: 11px; line-height: 1.45; }
 .local { font-size: 11px; }
 @media (max-width: 560px) { .local { display: none; } }
 /* el nombre hace de botón de inicio: limpia y vuelve a la pantalla de carga */
