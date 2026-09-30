@@ -308,7 +308,7 @@ const statusDot = { changed: '●', added: '+', removed: '−', equal: '·' }
         </template>
         <button v-if="modelA" class="ghost" @click="reset">Limpiar</button>
         <button class="ghost theme" :title="themeLabel[themePref]" @click="cycleTheme">
-          <span aria-hidden="true">{{ themePref === 'auto' ? '◐' : resolvedTheme === 'dark' ? '☾' : '☀' }}</span>
+          <span class="glyph" aria-hidden="true">{{ themePref === 'auto' ? '◐' : resolvedTheme === 'dark' ? '☾' : '☀' }}</span>
           <span class="sr">{{ themeLabel[themePref] }}</span>
         </button>
       </div>
@@ -701,7 +701,8 @@ textarea {
   border-bottom: 1px solid var(--line);
 }
 
-.theme { padding: 6px 10px; line-height: 1; font-size: 15px; }
+.theme { padding: 6px 10px; }
+.theme .glyph { font-size: 15px; line-height: 1; }
 .sr {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap;
